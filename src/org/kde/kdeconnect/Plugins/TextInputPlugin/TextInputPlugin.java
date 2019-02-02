@@ -25,16 +25,13 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 
 import org.kde.kdeconnect.NetworkPacket;
+import org.kde.kdeconnect.Plugins.MousePadPlugin.MousePadPlugin;
 import org.kde.kdeconnect.Plugins.Plugin;
 import org.kde.kdeconnect_tp.R;
 
 import androidx.core.content.ContextCompat;
 
 public class TextInputPlugin extends Plugin {
-
-    // re-use the mousepad events, so we don't have to change the desktop software
-    public final static String PACKET_TYPE_TEXTINPUT_REQUEST = "kdeconnect.mousepad.request";
-
     @Override
     public String getDisplayName() {
         return context.getString(R.string.pref_plugin_textinput);
@@ -69,7 +66,7 @@ public class TextInputPlugin extends Plugin {
 
     @Override
     public String[] getOutgoingPacketTypes() {
-        return new String[]{PACKET_TYPE_TEXTINPUT_REQUEST};
+        return new String[]{MousePadPlugin.PACKET_TYPE_MOUSEPAD_REQUEST};
     }
 
     @Override
