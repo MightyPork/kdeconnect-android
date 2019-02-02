@@ -21,6 +21,8 @@
 package org.kde.kdeconnect.Plugins.TextInputPlugin;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -29,6 +31,8 @@ import android.widget.TextView;
 import org.kde.kdeconnect.BackgroundService;
 import org.kde.kdeconnect.Device;
 import org.kde.kdeconnect.NetworkPacket;
+import org.kde.kdeconnect.Plugins.MousePadPlugin.KeyListenerView;
+import org.kde.kdeconnect.Plugins.MousePadPlugin.MousePadPlugin;
 import org.kde.kdeconnect.UserInterface.ThemeUtil;
 import org.kde.kdeconnect_tp.R;
 
@@ -38,8 +42,14 @@ public class TextInputActivity extends AppCompatActivity {
     private String deviceId;
 
     public void sendChars(CharSequence chars) {
-        final NetworkPacket np = new NetworkPacket(TextInputPlugin.PACKET_TYPE_TEXTINPUT_REQUEST);
+        final NetworkPacket np = new NetworkPacket(MousePadPlugin.PACKET_TYPE_MOUSEPAD_REQUEST);
         np.set("key", chars.toString());
+        sendKeyPressPacket(np);
+    }
+
+    public void sendSpecialKey(int code) {
+        final NetworkPacket np = new NetworkPacket(MousePadPlugin.PACKET_TYPE_MOUSEPAD_REQUEST);
+        np.set("specialKey", KeyListenerView.SpecialKeysMap.get(code));
         sendKeyPressPacket(np);
     }
 
@@ -73,16 +83,39 @@ public class TextInputActivity extends AppCompatActivity {
             case R.id.menu_submit_text:
                 submitText();
                 return true;
+            case R.id.menu_send_enter:
+                // send the text first, if there's anything
+                if (submitText()) {
+                    // send ENTER with a delay - it often happens that the events
+                    // arrive in the wrong order or too quickly (e.g. when writing into the jisho.org search field)
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            sendSpecialKey(KeyEvent.KEYCODE_ENTER);
+                        }
+                    }, 200);
+                } else {
+                    // had no text, so just send ENTER directly
+                    sendSpecialKey(KeyEvent.KEYCODE_ENTER);
+                }
+
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    private void submitText() {
+    private boolean submitText() {
         TextView v = findViewById(R.id.textInputField);
-        CharSequence text = v.getText();
-        v.setText("");
-        sendChars(text);
+        String text = v.getText().toString().trim();
+        if (text.length() > 0) {
+            sendChars(text);
+            v.setText("");
+            return true;
+        }
+
+        return false;
     }
 
     @Override

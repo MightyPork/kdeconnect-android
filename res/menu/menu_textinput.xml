@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:kdeconnect="http://schemas.android.com/apk/res-auto">
 
     <item
@@ -8,4 +9,9 @@
         android:title="@string/submit"
         kdeconnect:showAsAction="always" />
 
+    <item
+        android:id="@+id/menu_send_enter"
+        android:icon="@drawable/ic_send_return"
+        android:title="@string/send_return"
+        kdeconnect:showAsAction="always" />
 </menu>
